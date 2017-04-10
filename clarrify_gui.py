@@ -5,13 +5,12 @@ Created on 2017年4月6日
 '''
 #coding=utf-8
 from tkinter import *
+from tkinter import filedialog
+
 from PIL import ImageTk, Image
 from Get_dir_info import dir_files
 import os
 import operator
-from pip.utils.hashes import FAVORITE_HASH
-from asyncio.tasks import sleep
-from macpath import split
 
 class DemoGUI(Frame):
     select_1= 0
@@ -31,10 +30,11 @@ class DemoGUI(Frame):
     favor_file = "favor.txt"
     def __init__(self, master=None):
         Frame.__init__(self, master)
-        self.search_path = 'D:\GitHub\movies'
+        #self.search_path = 'D:\GitHub\movies'
         self.files_get = dir_files()
         self.grid()
         self["background"] = "gray"
+        self.search_path =  filedialog.askdirectory()
         self.createWidgets()
         
     def createWidgets(self):
@@ -48,8 +48,8 @@ class DemoGUI(Frame):
         self.listbox1.bind('<<ListboxSelect>>',self.motion3)
         #images
         img = ImageTk.PhotoImage(file='1.PNG')
-        
         self.lab1 = Label(self,text=u"照片顯示",image=img,height=489, width=489)
+        
         self.lab1.grid(row=0, column=1, rowspan=3,columnspan=4)
         self.lab1.bind('<Button-1>',self.start)
         
