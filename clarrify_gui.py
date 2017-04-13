@@ -13,11 +13,11 @@ import os
 import operator
 
 class DemoGUI(Frame):
-    select_1= 0
-    select_2= 0
-    select_3= 0
+    select_1= 0 #favor
+    select_2= 0 #actor
+    select_3= 0 #works
     files_get = object
-    search_path = ""
+    search_path = {}
     path_photo = {}
     list_actor_name = {}
     list_works_name = {}
@@ -28,35 +28,63 @@ class DemoGUI(Frame):
     faverit = {}
     movie_path = ""
     favor_file = "favor.txt"
+    mainHi = 619
+    mainWi = 840
+    upHi = 80
+    upWi = mainWi +173 # small bar
+    colspan1 = 2
+    colspan2 = 10
+    barcolspan = colspan1 +colspan2
+    imagebar_count = 0
     def __init__(self, master=None):
         Frame.__init__(self, master)
         #self.search_path = 'D:\GitHub\movies'
         self.files_get = dir_files()
         self.grid()
         self["background"] = "gray"
-        self.search_path =  filedialog.askdirectory()
+        search_path = {}
+        if not os.path.exists(self.favor_file):
+            search_path[1]=  filedialog.askdirectory()
+            self.search_path = search_path[1]
+            with open(self.favor_file,'w') as f:
+                favor = str(self.faverit) + "\n"
+                f.writelines(favor)
+                f.writelines(str(self.search_path))
+        else:
+            with open(self.favor_file,'r') as f:
+                #for line in f:
+                self.faverit = eval(f.readline())
+                search_path = eval(f.readline())
+                self.search_path = search_path[1]
         self.createWidgets()
         
     def createWidgets(self):
         #index
         #self.Text_for_save1 = Label(self, text = u"預覽圖", font = 16, background = "white")
         #self.Text_for_save1.grid(row=0, column=0)
-        self.listbox1 = Listbox(self,exportselection=0)
+        image = ImageTk.PhotoImage('RGB', (self.upHi,self.upWi))
+        self.lab1 = Label(self,text=u"作品顯示bar",image=image,height=self.upHi, width=self.upWi,)
+        self.lab1.grid(row=0, column=0,columnspan=self.barcolspan)
+        
+        self.listbox1 = Listbox(self,exportselection=0, width= 24)
         self.listbox1.insert(END, u"常用列表")
-        self.update_listbox1()            
-        self.listbox1.grid(row=0, column=0)
+        self.listbox1.itemconfig(0,{'bg':'lemon chiffon'})
+        self.listbox1.grid(row=1, column=0, columnspan=self.colspan1)
+        self.update_listbox1()#favor 
         self.listbox1.bind('<<ListboxSelect>>',self.motion3)
         #images
-        img = ImageTk.PhotoImage(file='1.PNG')
-        self.lab1 = Label(self,text=u"照片顯示",image=img,height=489, width=489)
+        #img = ImageTk.PhotoImage(file='1.PNG')
+        pimage = ImageTk.PhotoImage('RGB', (800,600))
+        self.lab2 = Label(self,text=u"照片顯示",image=pimage,height=self.mainHi, width=self.mainWi)
         
-        self.lab1.grid(row=0, column=1, rowspan=3,columnspan=4)
-        self.lab1.bind('<Button-1>',self.start)
+        self.lab2.grid(row=1, column=2, rowspan=3,columnspan=self.colspan2)
+        self.lab2.bind('<Button-1>',self.start)
         
         
-        self.listbox2 = Listbox(self,exportselection=0)
-        self.listbox2.insert(END, u"演員")
-        self.listbox2.grid(row=1, column=0) 
+        self.listbox2 = Listbox(self,exportselection=0, width= 24, height= 18)
+        self.listbox2.insert(END, u"演員", )
+        self.listbox2.grid(row=2, column=0,columnspan=self.colspan1) 
+        self.listbox2.itemconfig(0,{'bg':'lemon chiffon'})
         self.listbox2.bind('<<ListboxSelect>>',self.motion1)
         
         #get actors
@@ -69,9 +97,10 @@ class DemoGUI(Frame):
             count += 1
         #print(self.files_get.folder)
         
-        self.listbox3 = Listbox(self,exportselection=0)
+        self.listbox3 = Listbox(self,exportselection=0,  width= 24)
         self.listbox3.insert(END, u"作品")
-        self.listbox3.grid(row=2, column=0) 
+        self.listbox3.itemconfig(0,{'bg':'lemon chiffon'})
+        self.listbox3.grid(row=3, column=0,columnspan=self.colspan1) 
         self.listbox3.bind('<<ListboxSelect>>',self.motion2)
         #keep update window
         #self.after(1000, self.print_select)
@@ -81,36 +110,47 @@ class DemoGUI(Frame):
         #self.button2.grid(row=3, column=1) 
         
     def callback1(self):
-        self.select_2=""
+        self.select_3=""
         self.movie_path = ""
-        if self.select_1 != int(self.listbox2.curselection()[0]):
-            self.select_1 = int(self.listbox2.curselection()[0]) #取taple[0]
+        if int(self.listbox2.curselection()[0]) == 0:
+            self.listbox3.delete(1, END) # clear
+        
+        if self.select_2 != int(self.listbox2.curselection()[0]):
+            self.select_2 = int(self.listbox2.curselection()[0]) #取taple[0]
         else:
             try:
-                self.select_2 = int(self.listbox3.curselection()[0]) #取taple[0]
+                self.select_3 = int(self.listbox3.curselection()[0]) #取taple[0]
             except:
-                self.select_2 = 0 
+                self.select_3 = 0 
         
         # search from root
         #get_all_files = self.files_get.get_fileinfo(self.search_path)
         # second
-        get_all_files = self.files_get.get_fileinfo(self.search_path2[self.list_actor_name[self.select_1]])
-        self.current_select_act = self.list_actor_name[self.select_1]
-        photos = self.files_get.photo
-        self.movie_path = self.files_get.movie
-        self.show_photo(photos)         
-        
-        #show works if selected
-        if self.select_2 and self.select_2!=0:
-            get_all_files = self.files_get.get_fileinfo(self.files_get.folder[self.list_works_name[self.select_2]])
-            print(self.list_works_name[self.select_2])
-            self.current_select_work = self.list_works_name[self.select_2]
+        if int(self.listbox2.curselection()[0]) == 0:
+            self.listbox3.delete(1, END) # clear
+        else:
+            
+            get_all_files = self.files_get.get_fileinfo(self.search_path2[self.list_actor_name[self.select_2]])
+            self.current_select_act = self.list_actor_name[self.select_2]
             photos = self.files_get.photo
             self.movie_path = self.files_get.movie
-            self.show_photo(photos)
-        else:
-            self.listbox3.delete(1, END) # clear
-            self.listbox3_show(self.files_get.folder)
+            self.show_main_photo(photos)         
+            
+            #show works if selected
+            if self.select_3 and self.select_3!=0:
+                #show image when select
+                get_all_files = self.files_get.get_fileinfo(self.files_get.folder[self.list_works_name[self.select_3]])
+                self.current_select_work = self.list_works_name[self.select_3]
+                photos = self.files_get.photo
+                self.movie_path = self.files_get.movie
+                self.show_main_photo(photos)
+            else:
+                #clean if no listbox3 and regenerate list box3
+                self.movie_path = self.files_get.movie
+                self.listbox3.delete(1, END) # clear
+                self.listbox3_show(self.files_get.folder)
+                self.imagebar_show(self.files_get.folder)
+        
     def callback2(self):
         #self.update_listbox1()
         path_selected_favor = ""
@@ -124,7 +164,7 @@ class DemoGUI(Frame):
         get_all_files = self.files_get.get_fileinfo(path)
         photos = self.files_get.photo
         self.movie_path = self.files_get.movie
-        self.show_photo(photos)
+        self.show_main_photo(photos)
         #get_all_files = self.files_get.get_fileinfo([)
 
     def listbox3_show(self,lists):
@@ -133,30 +173,82 @@ class DemoGUI(Frame):
             self.listbox3.insert(END, item)
             self.list_works_name[count] = item
             count += 1
-        #print(self.files_get.folder)
-    def show_photo(self,photo_update):
-        for photo in photo_update:
-            img_resize = Image.open(fp=photo).resize((489, 489)) #image.ANTIALIAS for best quality
+            #show image bar
+            
+    def imagebar_show(self,lists):
+        self.clear_imgbar()
+        count = 0
+        self.imagebar_count = 0
+        for item, path in lists.items():
+            #paint all the works
+            get_all_files = self.files_get.get_fileinfo(path)
+            photos = self.files_get.photo
+            photo = photos[0]
+            img_resize = Image.open(fp=photo).resize((self.upHi, self.upHi)) #image.ANTIALIAS for best quality
             img = ImageTk.PhotoImage(img_resize)
-            self.lab1.configure(image=img)
-            self.lab1.image = img   # keep image
+            lab_in_imagebar = 'lab' + str(count)
+            #callback = # image call back
+            self.lab_in_imagebar = Label(self,text=u"作品顯示bar",image=img,height=self.upHi, width=self.upHi,)
+            #save the name
+            self.lab_in_imagebar.my_name = photo
+            
+            self.lab_in_imagebar.image = img   # keep image
+            self.lab_in_imagebar.grid(row=0, column=count)
+            self.lab_in_imagebar.bind('<Button-1>',self.motion4)
+            self.lab_in_imagebar.bind('<Double-Button-1>',self.motion5)
+            count = count + 1
+            self.lab_in_imagebar.selected = count
+            self.imagebar_count = count
+        while count < 12:
+            #paint all the empty for 12 pictures
+            image = ImageTk.PhotoImage('RGB', (self.upHi,self.upHi))
+            self.lab_in_imagebar = Label(self,text=u"作品顯示bar",image=image,height=self.upHi, width=self.upHi,)
+            self.lab_in_imagebar.grid(row=0, column=count)
+            count = count + 1
+            
+        
+        #print(self.files_get.folder)
+    def show_main_photo(self,photo_update):
+        for photo in photo_update:
+            img_resize = Image.open(fp=photo).resize((self.mainWi, self.mainHi)) #image.ANTIALIAS for best quality
+            img = ImageTk.PhotoImage(img_resize)
+            self.lab2.configure(image=img)
+            self.lab2.image = img   # keep image
+        
         #self.update_idletasks()
     def motion1(self,event):
         self.callback1()
     def motion2(self,event):
         self.callback1()
     def motion3(self,event):
-        self.listbox2.selection_clear(self.select_1)
-        self.listbox3.selection_clear(self.select_2)
+        if self.select_2:
+            self.listbox2.selection_clear(self.select_2)
+        if self.select_3:
+            self.listbox3.selection_clear(self.select_3)
+        self.clear_imgbar()
         self.callback2()
+    def motion4(self,event):
+        event_name = []
+        
+        event_name.append(event.widget.my_name) 
+        selected = event.widget.selected
+        self.current_select_work = self.list_works_name[selected]
+        path_selected = os.path.join(self.search_path,self.current_select_act,self.current_select_work)
+        get_all_files = self.files_get.get_fileinfo(path_selected)
+        self.movie_path = self.files_get.movie
+        self.callback3(event_name) 
+    def motion5(self,event):
+        
+        self.start(event)    
     def start(self,event):
         if self.movie_path:
             #count when you play the movie
             movie_name = self.current_select_act+'_'+self.current_select_work  
+            print(movie_name)  
             if movie_name =="_":
                 print(self.current_select_favor)
                 movie_name = self.current_select_favor 
-                 
+               
             if movie_name in self.faverit.keys():
                 self.faverit[movie_name] = self.faverit[movie_name] + 1
             else:
@@ -164,26 +256,32 @@ class DemoGUI(Frame):
                 self.faverit[movie_name] = 1
             #save favor
             with open(self.favor_file,'w') as f:
-                f.writelines(str(self.faverit))
+                favor = str(self.faverit) + "\n"
+                serch_path = {}
+                serch_path[1] = self.search_path
+                f.writelines(favor)
+                f.writelines(str(serch_path))
+                print("search path = " + str(serch_path))
             #play movie    
             os.system(self.movie_path[0].decode('utf-8'))
     def update_listbox1(self):
         self.listbox1.delete(1, END) # clear
         #faverit
-        try:
-            with open(self.favor_file,'r') as f:
-                #for line in f:
-                favor_count = 1
-                self.faverit = eval(f.readline())
-                favor_sort = sorted(self.faverit.items(),key=operator.itemgetter(1), reverse=True)
-                for favor in favor_sort:
-                    self.listbox1.insert(END, favor[0])
-                    self.list_favor_name[favor_count] = favor[0]
-                    favor_count = favor_count + 1
-                    if favor_count >= 5:
-                        break
-        except:
-            print('no faverit')
+        favor_count = 1
+        favor_sort = sorted(self.faverit.items(),key=operator.itemgetter(1), reverse=True)
+        for favor in favor_sort:
+            self.listbox1.insert(END, favor[0])
+            self.list_favor_name[favor_count] = favor[0]
+            favor_count = favor_count + 1
+            if favor_count > 5:
+                break
+    def clear_imgbar(self):
+        image = ImageTk.PhotoImage('RGB', (self.upHi,self.upWi))
+        self.lab1 = Label(self,text=u"作品顯示bar",image=image,height=self.upHi, width=self.upWi,)
+        self.lab1.grid(row=0, column=0,columnspan=self.barcolspan)
+        
+    def callback3(self, photo):  
+        self.show_main_photo(photo)
             
 if __name__ == '__main__':
     root = Tk() # Tk Object
