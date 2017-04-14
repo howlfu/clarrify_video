@@ -52,11 +52,11 @@ class dir_files(object):
                 
     def is_image(self,img_file):
         text = os.path.splitext(img_file)[-1]
-        return text in ['.jpg','.png']
+        return text in ['.jpg','.JPG','.png','.PNG']
     
     def is_video(self,img_file):
         text = os.path.splitext(img_file)[-1]
-        return text in ['.MOV','.mp4','.mkv','.avi','rmvb']
+        return text in ['.MOV','.mov','.mp4','.MP4','.mkv','.MKV','.AVI','.avi','.RMVB','.rmvb']
             
 if __name__ == '__main__':
     test = dir_files()

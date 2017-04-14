@@ -69,21 +69,21 @@ class DemoGUI(Frame):
         self.listbox1 = Listbox(self,exportselection=0, width= 24)
         self.listbox1.insert(END, u"常用列表")
         self.listbox1.itemconfig(0,{'bg':'lemon chiffon'})
-        self.listbox1.grid(row=1, column=0, columnspan=self.colspan1)
+        self.listbox1.grid(row=2, column=0, columnspan=self.colspan1)
         self.update_listbox1()#favor 
         self.listbox1.bind('<<ListboxSelect>>',self.motion3)
         #images
         #img = ImageTk.PhotoImage(file='1.PNG')
-        pimage = ImageTk.PhotoImage('RGB', (800,600))
+        pimage = ImageTk.PhotoImage('RGB', (self.mainWi,self.mainHi))
         self.lab2 = Label(self,text=u"照片顯示",image=pimage,height=self.mainHi, width=self.mainWi)
         
-        self.lab2.grid(row=1, column=2, rowspan=3,columnspan=self.colspan2)
+        self.lab2.grid(row=2, column=2, rowspan=3,columnspan=self.colspan2)
         self.lab2.bind('<Button-1>',self.start)
         
         
         self.listbox2 = Listbox(self,exportselection=0, width= 24, height= 18)
         self.listbox2.insert(END, u"演員", )
-        self.listbox2.grid(row=2, column=0,columnspan=self.colspan1) 
+        self.listbox2.grid(row=3, column=0,columnspan=self.colspan1) 
         self.listbox2.itemconfig(0,{'bg':'lemon chiffon'})
         self.listbox2.bind('<<ListboxSelect>>',self.motion1)
         
@@ -100,7 +100,7 @@ class DemoGUI(Frame):
         self.listbox3 = Listbox(self,exportselection=0,  width= 24)
         self.listbox3.insert(END, u"作品")
         self.listbox3.itemconfig(0,{'bg':'lemon chiffon'})
-        self.listbox3.grid(row=3, column=0,columnspan=self.colspan1) 
+        self.listbox3.grid(row=4, column=0,columnspan=self.colspan1) 
         self.listbox3.bind('<<ListboxSelect>>',self.motion2)
         #keep update window
         #self.after(1000, self.print_select)
@@ -113,8 +113,9 @@ class DemoGUI(Frame):
         self.select_3=""
         self.movie_path = ""
         if int(self.listbox2.curselection()[0]) == 0:
-            self.listbox3.delete(1, END) # clear
-        
+            # clear works when select actor list 0
+            self.listbox3.delete(1, END) 
+            
         if self.select_2 != int(self.listbox2.curselection()[0]):
             self.select_2 = int(self.listbox2.curselection()[0]) #取taple[0]
         else:
@@ -133,7 +134,7 @@ class DemoGUI(Frame):
             get_all_files = self.files_get.get_fileinfo(self.search_path2[self.list_actor_name[self.select_2]])
             self.current_select_act = self.list_actor_name[self.select_2]
             photos = self.files_get.photo
-            self.movie_path = self.files_get.movie
+            
             self.show_main_photo(photos)         
             
             #show works if selected
@@ -155,8 +156,8 @@ class DemoGUI(Frame):
         #self.update_listbox1()
         path_selected_favor = ""
         path = ""
-        self.select_3 = int(self.listbox1.curselection()[0])
-        selected_favor_name = self.list_favor_name[self.select_3]
+        self.select_1 = int(self.listbox1.curselection()[0])
+        selected_favor_name = self.list_favor_name[self.select_1]
         self.current_select_favor = selected_favor_name
         selected_favor_name = selected_favor_name.split("_")
         path_selected_favor = os.path.join(self.search_path,selected_favor_name[0],selected_favor_name[1])
@@ -181,6 +182,9 @@ class DemoGUI(Frame):
         self.imagebar_count = 0
         for item, path in lists.items():
             #paint all the works
+            if count > 11:
+                #only show 12 images
+                break
             get_all_files = self.files_get.get_fileinfo(path)
             photos = self.files_get.photo
             photo = photos[0]
@@ -193,18 +197,22 @@ class DemoGUI(Frame):
             self.lab_in_imagebar.my_name = photo
             
             self.lab_in_imagebar.image = img   # keep image
+
             self.lab_in_imagebar.grid(row=0, column=count)
             self.lab_in_imagebar.bind('<Button-1>',self.motion4)
             self.lab_in_imagebar.bind('<Double-Button-1>',self.motion5)
+        
             count = count + 1
             self.lab_in_imagebar.selected = count
             self.imagebar_count = count
+            
         while count < 12:
             #paint all the empty for 12 pictures
             image = ImageTk.PhotoImage('RGB', (self.upHi,self.upHi))
             self.lab_in_imagebar = Label(self,text=u"作品顯示bar",image=image,height=self.upHi, width=self.upHi,)
             self.lab_in_imagebar.grid(row=0, column=count)
             count = count + 1
+            
             
         
         #print(self.files_get.folder)
@@ -217,28 +225,43 @@ class DemoGUI(Frame):
         
         #self.update_idletasks()
     def motion1(self,event):
+        #actor
         self.callback1()
     def motion2(self,event):
+        #works
+        if self.select_1:
+            self.listbox1.selection_clear(self.select_1)
         self.callback1()
     def motion3(self,event):
-        if self.select_2:
-            self.listbox2.selection_clear(self.select_2)
+        #favor
+        
         if self.select_3:
             self.listbox3.selection_clear(self.select_3)
-        self.clear_imgbar()
+        #self.clear_imgbar()
         self.callback2()
     def motion4(self,event):
+        #one click on image bar
         event_name = []
-        
         event_name.append(event.widget.my_name) 
-        selected = event.widget.selected
-        self.current_select_work = self.list_works_name[selected]
+        
+        #clear listbox3 before set
+        if self.select_1:
+            self.listbox1.selection_clear(self.select_1)
+        if self.select_3:
+            self.listbox3.selection_clear(self.select_3)
+        #save current image bar selected
+        self.select_3 = event.widget.selected
+        self.current_select_work = self.list_works_name[self.select_3]
+        #select listbox3 when select imagebar
+        
+        self.listbox3.select_set(self.select_3)
+        #make path for each image bar label
         path_selected = os.path.join(self.search_path,self.current_select_act,self.current_select_work)
         get_all_files = self.files_get.get_fileinfo(path_selected)
         self.movie_path = self.files_get.movie
         self.callback3(event_name) 
     def motion5(self,event):
-        
+        #double clicks
         self.start(event)    
     def start(self,event):
         if self.movie_path:
