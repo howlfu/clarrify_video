@@ -61,7 +61,7 @@ class dir_files(object):
 if __name__ == '__main__':
     test = dir_files()
     info1 = {}
-    info1 = test.get_fileinfo('D:\\GitHub\\movies\\周杰倫\\葉惠美')
+    info1 = test.get_fileinfo('D:\\GitHub\\movies\\周杰倫\\葉惠美f')
     print("img = " + str(test.photo))
     print("mov = " + str(test.movie))
     #print(info1)
